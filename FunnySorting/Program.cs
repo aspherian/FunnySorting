@@ -6,60 +6,7 @@ namespace SortingAgain
 {
     internal class Program
     {
-        public static void Main()
-        {
-
-            int[] arr = new int[50];
-            Random random = new Random();
-
-            for (int i = 0; i < arr.Length; i++)
-            {
-                arr[i] = random.Next(1, 50);
-            }
-
-            Console.WriteLine("Массив:");
-            Console.WriteLine(string.Join(" ", arr));
-
-            Console.WriteLine("SelectionSort:");
-            Console.WriteLine(string.Join(" ", SelectionSort(arr)));
-
-            Console.WriteLine();
-
-
-            // вывод результата всех сортировок
-            /* 
-
-            // вывод для пирамидальной сортировки
-            int n = arr.Length;
-
-            // HeapSort ob = new HeapSort();
-            // ob.Sort(arr);
-            // ob.PrintArray(arr);
-
-            //вывод для сортировки слиянием
-            Console.WriteLine("Сортировка слиянием");
-            Console.WriteLine(string.Join(" ", MergeSort.Sort(arr)));
-
-
-
-            //вывод для сортировки вставками
-            Console.WriteLine("Сортировка вставками");
-            Console.WriteLine(string.Join(" ", InsertionSort(arr)));
-
-            //вывод для сортировки Методол Шелла
-            Console.WriteLine("Сортировка Методом Шелла");
-            Console.WriteLine(string.Join(" ", ShellSort(arr)));
-
-            //вывод для пузырьковой сортировки 
-            Console.WriteLine("Пузырькова сортировка");
-            Console.WriteLine(string.Join(" ", BubbleSort(arr)));
-
-            */
-
-
-
-
-        }
+        
 
         public static int[] SelectionSort(int[] arr)
         {
@@ -192,41 +139,128 @@ namespace SortingAgain
             return marker;
         }
 
-        public class MergeSort
+        public class Node
         {
-            public static int[] Sort(int[] arr)
+            public int data;
+            public Node prev;
+            public Node next;
+
+            public Node(int d)
             {
-                if (arr.Length <= 1)
-                    return arr;
+                data = d;
+                prev = null;
+                next = null;
+            }
+        }
 
-                int midPoint = arr.Length / 2;
+        public class DoublyLinkedList
+        {
+            public Node head;
 
-                int[] leftArr = arr.Take(midPoint).ToArray();
-                int[] rightArr = arr.Skip(midPoint).ToArray();
-
-                return Merge(Sort(leftArr), Sort(rightArr));
+            public DoublyLinkedList()
+            {
+                head = null;
             }
 
-            public static int[] Merge(int[] arr1, int[] arr2)
+            public Node MergeSort(Node node)
             {
-                int[] merged = new int[arr1.Length + arr2.Length];
-                int i = 0, j = 0, k = 0;
-
-                while (i < arr1.Length && j < arr2.Length)
+                if (node == null || node.next == null)
                 {
-                    if (arr1[i] <= arr2[j])
-                        merged[k++] = arr1[i++];
-                    else
-                        merged[k++] = arr2[j++];
+                    return node;
                 }
 
-                while (i < arr1.Length)
-                    merged[k++] = arr1[i++];
+                Node middle = GetMiddle(node);
+                Node nextOfMiddle = middle.next;
 
-                while (j < arr2.Length)
-                    merged[k++] = arr2[j++];
+                middle.next = null;
 
-                return merged;
+                Node left = MergeSort(node);
+                Node right = MergeSort(nextOfMiddle);
+
+                Node sortedList = Merge(left, right);
+
+                return sortedList;
+            }
+
+            private Node Merge(Node left, Node right)
+            {
+                if (left == null)
+                {
+                    return right;
+                }
+
+                if (right == null)
+                {
+                    return left;
+                }
+
+                Node result = null;
+
+                if (left.data <= right.data)
+                {
+                    result = left;
+                    result.next = Merge(left.next, right);
+                    result.next.prev = result;
+                }
+                else
+                {
+                    result = right;
+                    result.next = Merge(left, right.next);
+                    result.next.prev = result;
+                }
+
+                return result;
+            }
+
+            private Node GetMiddle(Node node)
+            {
+                if (node == null)
+                {
+                    return node;
+                }
+
+                Node slow = node;
+                Node fast = node;
+
+                while (fast.next != null && fast.next.next != null)
+                {
+                    slow = slow.next;
+                    fast = fast.next.next;
+                }
+
+                return slow;
+            }
+
+            public void PrintList(Node node)
+            {
+                Node last = null;
+                while (node != null)
+                {
+                    Console.Write(node.data + " ");
+                    last = node;
+                    node = node.next;
+                }
+                Console.WriteLine();
+            }
+
+            public void AddNode(int data)
+            {
+                Node newNode = new Node(data);
+
+                if (head == null)
+                {
+                    head = newNode;
+                }
+                else
+                {
+                    Node current = head;
+                    while (current.next != null)
+                    {
+                        current = current.next;
+                    }
+                    current.next = newNode;
+                    newNode.prev = current;
+                }
             }
         }
 
@@ -295,6 +329,75 @@ namespace SortingAgain
             a = b;
             b = temp;
         }
+        public static void Main()
+        {
 
+            int[] arr = new int[50];
+            Random random = new Random();
+
+            for (int i = 0; i < arr.Length; i++)
+            {
+                arr[i] = random.Next(1, 50);
+            }
+
+            Console.WriteLine("Массив:");
+            Console.WriteLine(string.Join(" ", arr));
+
+            Console.WriteLine("SelectionSort:");
+            Console.WriteLine(string.Join(" ", SelectionSort(arr)));
+
+            Console.WriteLine();
+
+
+            DoublyLinkedList dll = new DoublyLinkedList();
+            dll.AddNode(5);
+            dll.AddNode(2);
+            dll.AddNode(8);
+            dll.AddNode(1);
+            dll.AddNode(9);
+
+            Console.WriteLine("До сортировки:");
+            dll.PrintList(dll.head);
+
+            dll.head = dll.MergeSort(dll.head);
+
+            Console.WriteLine("Сортировка слиянием:");
+            dll.PrintList(dll.head);
+
+
+            // вывод результата всех сортировок
+            /* 
+
+            // вывод для пирамидальной сортировки
+            int n = arr.Length;
+
+            // HeapSort ob = new HeapSort();
+            // ob.Sort(arr);
+            // ob.PrintArray(arr);
+
+            //вывод для сортировки слиянием
+            Console.WriteLine("Сортировка слиянием");
+            Console.WriteLine(string.Join(" ", MergeSort.Sort(arr)));
+
+
+
+            //вывод для сортировки вставками
+            Console.WriteLine("Сортировка вставками");
+            Console.WriteLine(string.Join(" ", InsertionSort(arr)));
+
+            //вывод для сортировки Методол Шелла
+            Console.WriteLine("Сортировка Методом Шелла");
+            Console.WriteLine(string.Join(" ", ShellSort(arr)));
+
+            //вывод для пузырьковой сортировки 
+            Console.WriteLine("Пузырькова сортировка");
+            Console.WriteLine(string.Join(" ", BubbleSort(arr)));
+
+            */
+
+
+
+
+        }
     }
 }
